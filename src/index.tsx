@@ -100,12 +100,6 @@ interface Bug {
   isFriendly: boolean;
 }
 
-// Array<string>
-// string[]
-
-// object
-// {}
-
 // known as enums
 const BUGS: { [key: string]: Bug } = {
   LADY_BUG: {
