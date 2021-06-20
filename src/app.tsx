@@ -1,0 +1,336 @@
+import React, { useState, useEffect, useRef } from "react";
+// import ReactDOM from "react-dom";
+import "./index.css";
+import ladyBugImg from "./images/ladybug.png";
+import beeImg from "./images/bee.png";
+import miteImg from "./images/mite.png";
+import slugImg from "./images/slug.png";
+import backgroundImg from "./images/background.jpg";
+
+const TARGET_CORRECT_GUESSES: number = 2;
+const UPPER_BUG_COUNT: number = 5;
+
+const VIEW_WIDTH = document.documentElement.clientWidth;
+const VIEW_HEIGHT = document.documentElement.clientHeight;
+
+interface ModalProps {
+  showModal: boolean;
+  hasWon: boolean;
+  isFriendly: boolean;
+  onClick: () => void;
+}
+
+const Modal: React.FC<ModalProps> = (props) => {
+  let modalContent, modalHeader;
+  if (props.hasWon) {
+    modalHeader = "Congratulations!";
+    modalContent = "You have won the game.";
+  } else if (props.isFriendly) {
+    modalHeader = "Oops!";
+    modalContent = "That's a good bug.";
+  } else {
+    modalHeader = "Correct!";
+    modalContent = "That's a bad bug.";
+  }
+
+  if (props.showModal) {
+    return (
+      <>
+        <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
+          <div className="relative w-auto my-6 mx-auto max-w-3xl">
+            {/*content*/}
+            <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+              {/*header*/}
+              <div className="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
+                <h3 className="text-3xl font-semibold">{modalHeader}</h3>
+                <button
+                  className="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
+                  onClick={props.onClick}
+                >
+                  <span className="bg-transparent text-black opacity-5 h-6 w-6 text-2xl block outline-none focus:outline-none">
+                    ×
+                  </span>
+                </button>
+              </div>
+              {/*body*/}
+              <div className="relative p-6 flex-auto">
+                <p className="my-4 text-blueGray-500 text-lg leading-relaxed">
+                  {modalContent}
+                </p>
+              </div>
+              {/*footer*/}
+              <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
+                <button
+                  className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                  type="button"
+                  onClick={props.onClick}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+      </>
+    );
+  } else {
+    return null;
+  }
+};
+
+interface BugProps {
+  key: number;
+  id: number;
+  bugType: string;
+  onClick?: () => void;
+}
+
+const Bug: React.FC<BugProps> = (props) => {
+  const [x, setX] = useState(VIEW_WIDTH * Math.random());
+  const [y, setY] = useState(VIEW_HEIGHT * Math.random());
+  const [targetX, setTargetX] = useState(VIEW_WIDTH * Math.random());
+  const [targetY, setTargetY] = useState(VIEW_HEIGHT * Math.random());
+
+  // need useRef hook so that values persist in successive renders
+  const posIntervalID = useRef(0);
+  const moveIntervalID = useRef(0);
+
+  // replicate componendDidMount
+  useEffect(() => {
+    const newPos = () => {
+      setTargetX(VIEW_WIDTH * Math.random());
+      setTargetY(VIEW_HEIGHT * Math.random());
+    };
+
+    posIntervalID.current = window.setInterval(newPos, 2000);
+
+    return () => {
+      clearInterval(posIntervalID.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const move = () => {
+      const moveRate = 0.01;
+
+      setX((x) => (moveRate * targetX + x) / (1 + moveRate));
+      setY((y) => (moveRate * targetY + y) / (1 + moveRate));
+    };
+
+    moveIntervalID.current = window.setInterval(move, 20);
+
+    return () => {
+      clearInterval(moveIntervalID.current);
+    };
+  }, [targetX, targetY]);
+
+  return (
+    <foreignObject x={x} y={y} width="100" height="97" onClick={props.onClick}>
+      <img
+        src={BUGS[props.bugType].imgSrc}
+        alt={`${props.bugType}`}
+        className="bug-img"
+      />
+    </foreignObject>
+  );
+};
+
+interface BugItem {
+  bugType: string;
+  imgSrc: string;
+  isFriendly: boolean;
+}
+
+// known as enums
+const BUGS: { [key: string]: BugItem } = {
+  LADY_BUG: {
+    bugType: "LADY_BUG",
+    imgSrc: ladyBugImg,
+    isFriendly: true,
+  },
+  BEE: {
+    bugType: "BEE",
+    imgSrc: beeImg,
+    isFriendly: true,
+  },
+  MITE: {
+    bugType: "MITE",
+    imgSrc: miteImg,
+    isFriendly: false,
+  },
+  SLUG: {
+    bugType: "SLUG",
+    imgSrc: slugImg,
+    isFriendly: false,
+  },
+};
+
+const bugTypes = Object.keys(BUGS);
+
+interface GameProps {}
+
+const Game: React.FC<GameProps> = (props) => {
+  // define states using state hook
+  // typescript implicitly knows the type of each state from initial value
+  const [showModal, setShowModal] = useState(false);
+  const [currentBugType, setCurrentBugType] = useState(""); // for modal
+  const [hasWon, setHasWon] = useState(false);
+  const [correctBugs, setCorrectBugs] = useState(new Set()); // tracking progress
+  const [bugIds, setBugIds] = useState<number[]>([]); // an array of bug ids
+  // const [bugId, setBugId] = useState(0); // to set id for latest spawned bug
+
+  const intervalID = useRef(0);
+
+  const numSpawnedBugs = useRef(0);
+
+  // component did mount
+  useEffect(() => {
+    // create a new bug and give it a unique index
+    // console.log("new useEffect");
+
+    const spawnNewBug = () => {
+      // if (n > UPPER_COUNT) return
+      if (bugIds.length >= UPPER_BUG_COUNT) {
+        return;
+      } else {
+        // console.log(numSpawnedBugs.current);
+        numSpawnedBugs.current += 1;
+        setBugIds((prevState) => {
+          return [...prevState, numSpawnedBugs.current];
+        });
+      }
+    };
+
+    intervalID.current = window.setInterval(spawnNewBug, 1000);
+
+    return () => {
+      clearInterval(intervalID.current);
+    };
+  }, [bugIds, numSpawnedBugs]);
+
+  const toggleModal = () => {
+    setShowModal((prevState) => !prevState);
+  };
+
+  /**
+   * Set the bugId state value to the id of the latest clicked bug
+   *
+   * @param bugId - id of the bug that was clicked
+   * bugId - the index of the bug so that it can be deleted from bugs list
+   */
+  const handleBug = (bugType: string, bugId: number) => {
+    toggleModal();
+
+    setCurrentBugType(bugType);
+
+    if (BUGS[bugType]) {
+      if (!BUGS[bugType].isFriendly) {
+        if (!hasWon) {
+          if (!correctBugs.has(bugType)) {
+            // does not have bugId yet
+            if (correctBugs.add(bugType).size === TARGET_CORRECT_GUESSES) {
+              // check for win
+              setHasWon(true);
+              setCorrectBugs(new Set());
+            } else {
+              // if next step not win, just add to list
+              setHasWon(false);
+              setCorrectBugs((prevState) => {
+                return new Set([...prevState, bugType]);
+              });
+            }
+          } else {
+            // already has bugId
+            // do nothing
+          }
+        } else {
+          // reset if u click bad bug after winning game
+          setHasWon(false);
+          setCorrectBugs((prevState) => {
+            return new Set([...prevState, bugType]);
+          });
+        }
+      } else {
+        // if bug is not friendly
+        if (hasWon) {
+          // reset if u click good bug after winning game
+          setHasWon(false);
+          setCorrectBugs(new Set());
+        } else {
+          // this triggers when correctBugs set is either empty or not-yet-full
+          // two possibilities
+          // resets all progress if u click on a good bug
+          setHasWon(false);
+          setCorrectBugs(new Set());
+
+          // or keep the current progress (keep the set)
+          //   setHasWon(false);
+        }
+      }
+    } else {
+      throw new Error("Whoops! The given BugId does not exist in BUGS object.");
+    }
+
+    // splice
+    let newBugs = bugIds;
+    for (let i = 0; i < bugIds.length; i++) {
+      if (bugIds[i] === bugId) {
+        newBugs.splice(i, 1);
+      }
+    }
+
+    setBugIds(newBugs);
+  };
+
+  /**
+   * gets a unique index (hash) for a given id
+   * @param id : id of the bug that was clicked
+   * @returns a random bugType unique to the id
+   */
+  const getRandomBug = (id: number) => {
+    // for ultimate difficulty :p
+    // const randomNum: number = Math.floor(3 * Math.random());
+
+    // generate a random index for the id
+    const randomBugTypeIndex = id % bugTypes.length;
+
+    return bugTypes[randomBugTypeIndex];
+  };
+
+  // render
+  return (
+    <>
+      <Modal
+        showModal={showModal}
+        isFriendly={currentBugType ? BUGS[currentBugType].isFriendly : false}
+        hasWon={hasWon}
+        onClick={() => toggleModal()}
+      />
+
+      <div className="absolute top-0 left-0 z-10">
+        <svg className="w-screen h-screen">
+          {bugIds.map((id) => {
+            return (
+              <Bug
+                key={id}
+                id={id}
+                bugType={getRandomBug(id)}
+                onClick={() => handleBug(getRandomBug(id), id)}
+              />
+            );
+          })}
+        </svg>
+      </div>
+
+      <img
+        className="w-screen h-screen z-0 filter blur-sm"
+        src={backgroundImg}
+        alt="background"
+      />
+    </>
+  );
+};
+
+// ReactDOM.render(<Game />, document.getElementById("root"));
+export default Game;
