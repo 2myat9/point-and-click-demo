@@ -7,12 +7,16 @@ import miteImg from "./images/mite.png";
 import slugImg from "./images/slug.png";
 import backgroundImg from "./images/background.jpg";
 
+// number of bad bugs to be clicked to win the game
 const TARGET_CORRECT_GUESSES: number = 2;
+
+// number of max bugs on screen at any time
 const UPPER_BUG_COUNT: number = 5;
 
 const VIEW_WIDTH = document.documentElement.clientWidth;
 const VIEW_HEIGHT = document.documentElement.clientHeight;
 
+// modal component that appears when clicking a bug
 interface ModalProps {
   showModal: boolean;
   hasWon: boolean;
@@ -79,6 +83,7 @@ const Modal: React.FC<ModalProps> = (props) => {
   }
 };
 
+// bug component
 interface BugProps {
   key: number;
   id: number;
@@ -92,20 +97,22 @@ const Bug: React.FC<BugProps> = (props) => {
   const [targetX, setTargetX] = useState(VIEW_WIDTH * Math.random());
   const [targetY, setTargetY] = useState(VIEW_HEIGHT * Math.random());
 
-  // need useRef hook so that values persist in successive renders
+  // useRef hook enables values to persist in successive renders
   const posIntervalID = useRef(0);
   const moveIntervalID = useRef(0);
 
-  // replicate componendDidMount
   useEffect(() => {
+    // when component mounts
     const newPos = () => {
       setTargetX(VIEW_WIDTH * Math.random());
       setTargetY(VIEW_HEIGHT * Math.random());
     };
 
+    // component finds a new target position every 2 second
     posIntervalID.current = window.setInterval(newPos, 2000);
 
     return () => {
+      // when component unmounts
       clearInterval(posIntervalID.current);
     };
   }, []);
@@ -118,6 +125,7 @@ const Bug: React.FC<BugProps> = (props) => {
       setY((y) => (moveRate * targetY + y) / (1 + moveRate));
     };
 
+    // component changes x, y values every 20ms
     moveIntervalID.current = window.setInterval(move, 20);
 
     return () => {
@@ -126,6 +134,7 @@ const Bug: React.FC<BugProps> = (props) => {
   }, [targetX, targetY]);
 
   return (
+    // foreign object is used to wrap the image and render it on svg canvas
     <foreignObject x={x} y={y} width="100" height="97" onClick={props.onClick}>
       <img
         src={BUGS[props.bugType].imgSrc}
@@ -142,7 +151,9 @@ interface BugItem {
   isFriendly: boolean;
 }
 
-// known as enums
+// this enum stores all values associated with objects in the game
+// also helps prevent naming inconsistencies
+
 const BUGS: { [key: string]: BugItem } = {
   LADY_BUG: {
     bugType: "LADY_BUG",
@@ -170,31 +181,31 @@ const bugTypes = Object.keys(BUGS);
 
 interface GameProps {}
 
+// main parent component
 const Game: React.FC<GameProps> = (props) => {
   // define states using state hook
   // typescript implicitly knows the type of each state from initial value
   const [showModal, setShowModal] = useState(false);
-  const [currentBugType, setCurrentBugType] = useState(""); // for modal
+  const [currentBugType, setCurrentBugType] = useState(""); // so that modal component knows a bug is good or bad
   const [hasWon, setHasWon] = useState(false);
   const [correctBugs, setCorrectBugs] = useState(new Set()); // tracking progress
   const [bugIds, setBugIds] = useState<number[]>([]); // an array of bug ids
-  // const [bugId, setBugId] = useState(0); // to set id for latest spawned bug
 
   const intervalID = useRef(0);
 
+  // this variable keeps track of total # of spawned bugs
+  // also sets the id for a newest spawned bug
   const numSpawnedBugs = useRef(0);
 
   // component did mount
   useEffect(() => {
     // create a new bug and give it a unique index
-    // console.log("new useEffect");
 
     const spawnNewBug = () => {
       // if (n > UPPER_COUNT) return
       if (bugIds.length >= UPPER_BUG_COUNT) {
         return;
       } else {
-        // console.log(numSpawnedBugs.current);
         numSpawnedBugs.current += 1;
         setBugIds((prevState) => {
           return [...prevState, numSpawnedBugs.current];
@@ -209,15 +220,17 @@ const Game: React.FC<GameProps> = (props) => {
     };
   }, [bugIds, numSpawnedBugs]);
 
+  /**
+   * toggles the render state of modal component
+   */
   const toggleModal = () => {
     setShowModal((prevState) => !prevState);
   };
 
   /**
-   * Set the bugId state value to the id of the latest clicked bug
+   * Delivers info about current clicked bug to Modal and removes the bug from screen
    *
-   * @param bugId - id of the bug that was clicked
-   * bugId - the index of the bug so that it can be deleted from bugs list
+   * @param bugId - the id of the bug so that it can be deleted from bugs array
    */
   const handleBug = (bugType: string, bugId: number) => {
     toggleModal();
@@ -230,11 +243,11 @@ const Game: React.FC<GameProps> = (props) => {
           if (!correctBugs.has(bugType)) {
             // does not have bugId yet
             if (correctBugs.add(bugType).size === TARGET_CORRECT_GUESSES) {
-              // check for win
+              // check for win on next guess
               setHasWon(true);
               setCorrectBugs(new Set());
             } else {
-              // if next step not win, just add to list
+              // if next guess not win, just add to list
               setHasWon(false);
               setCorrectBugs((prevState) => {
                 return new Set([...prevState, bugType]);
@@ -272,7 +285,7 @@ const Game: React.FC<GameProps> = (props) => {
       throw new Error("Whoops! The given BugId does not exist in BUGS object.");
     }
 
-    // splice
+    // removes the bug from bugIds array so that it is no longer rendered
     let newBugs = bugIds;
     for (let i = 0; i < bugIds.length; i++) {
       if (bugIds[i] === bugId) {
