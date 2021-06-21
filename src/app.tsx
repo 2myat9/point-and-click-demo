@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 // import ReactDOM from "react-dom";
-import "./index.css";
+import "./app.css";
 import ladyBugImg from "./images/ladybug.png";
 import beeImg from "./images/bee.png";
 import miteImg from "./images/mite.png";
