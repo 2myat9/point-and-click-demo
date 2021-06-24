@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 // import ReactDOM from "react-dom";
-import "./app.css";
+import "./index.css";
 import ladyBugImg from "./images/ladybug.png";
 import beeImg from "./images/bee.png";
 import miteImg from "./images/mite.png";
 import slugImg from "./images/slug.png";
 import backgroundImg from "./images/background.jpg";
+// import { readBuilderProgram } from "typescript";
 
 // number of bad bugs to be clicked to win the game
 const TARGET_CORRECT_GUESSES: number = 2;
@@ -96,6 +97,7 @@ const Bug: React.FC<BugProps> = (props) => {
   const [y, setY] = useState(VIEW_HEIGHT * Math.random());
   const [targetX, setTargetX] = useState(VIEW_WIDTH * Math.random());
   const [targetY, setTargetY] = useState(VIEW_HEIGHT * Math.random());
+  const [isOnHover, setIsOnHover] = useState(false);
 
   // useRef hook enables values to persist in successive renders
   const posIntervalID = useRef(0);
@@ -133,13 +135,28 @@ const Bug: React.FC<BugProps> = (props) => {
     };
   }, [targetX, targetY]);
 
+  const changeHoverStyle = () => {
+    setIsOnHover((prevState) => !prevState);
+  };
+
+  const bugImgStyle = {
+    filter: "none",
+  };
+
+  const hoverBugImgStyle = {
+    cursor: "pointer",
+    filter: "drop-shadow(2px 2px 4px #cc0000)",
+  };
+
   return (
     // foreign object is used to wrap the image and render it on svg canvas
-    <foreignObject x={x} y={y} width="100" height="97" onClick={props.onClick}>
+    <foreignObject x={x} y={y} width="120" height="120" onClick={props.onClick}>
       <img
         src={BUGS[props.bugType].imgSrc}
         alt={`${props.bugType}`}
-        className="bug-img"
+        style={isOnHover ? hoverBugImgStyle : bugImgStyle}
+        onMouseOver={changeHoverStyle}
+        onMouseLeave={changeHoverStyle}
       />
     </foreignObject>
   );
@@ -178,6 +195,53 @@ const BUGS: { [key: string]: BugItem } = {
 };
 
 const bugTypes = Object.keys(BUGS);
+
+interface ProgressBarProps {
+  barLength: number;
+  progressPercent: number;
+}
+
+const ProgressBar: React.FC<ProgressBarProps> = (props) => {
+  const [progressBarLength, setProgresBarLength] = useState(0);
+
+  // runs every time the component rerenders
+  useEffect(() => {
+    setProgresBarLength(props.progressPercent * props.barLength);
+  }, [props.progressPercent]);
+
+  // const progressBarContainerStyle = {
+  //   Position: "absolute",
+  //   left: "100px",
+  //   top: "100px",
+  //   display: "flex",
+  //   alignItems: "center",
+  //   justifyContent: "center",
+  //   ZIndex: "10",
+  // };
+
+  const progressBarStyle = {
+    backgroundColor: "rgb(233, 233, 233)",
+    borderRadius: "0.5rem",
+    width: `${props.barLength}px`,
+  };
+
+  const filledProgressBarStyle = {
+    backgroundColor: "rgb(62, 122, 235)",
+    height: "10px",
+    borderRadius: "1rem",
+    width: `${progressBarLength}px`,
+    // animation
+    transition: "1s ease",
+  };
+
+  return (
+    <div className="absolute top-16 left-16 z-10">
+      <div style={progressBarStyle}>
+        <div style={filledProgressBarStyle} />
+      </div>
+    </div>
+  );
+};
 
 interface GameProps {}
 
@@ -244,8 +308,11 @@ const Game: React.FC<GameProps> = (props) => {
             // does not have bugId yet
             if (correctBugs.add(bugType).size === TARGET_CORRECT_GUESSES) {
               // check for win on next guess
+              // if win, don't reset yet so that progress bar shows full right after winning
               setHasWon(true);
-              setCorrectBugs(new Set());
+              setCorrectBugs((prevState) => {
+                return new Set([...prevState, bugType]);
+              });
             } else {
               // if next guess not win, just add to list
               setHasWon(false);
@@ -260,6 +327,7 @@ const Game: React.FC<GameProps> = (props) => {
         } else {
           // reset if u click bad bug after winning game
           setHasWon(false);
+          setCorrectBugs(new Set());
           setCorrectBugs((prevState) => {
             return new Set([...prevState, bugType]);
           });
@@ -320,6 +388,8 @@ const Game: React.FC<GameProps> = (props) => {
         hasWon={hasWon}
         onClick={() => toggleModal()}
       />
+
+      <ProgressBar barLength={400} progressPercent={correctBugs.size / 2} />
 
       <div className="absolute top-0 left-0 z-10">
         <svg className="w-screen h-screen">
