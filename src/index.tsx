@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-// import Game from "./app";
-import Help from "./help";
+import App from "./app";
 
-ReactDOM.render(<Help />, document.getElementById("root"));
+ReactDOM.render(<App />, document.getElementById("root"));

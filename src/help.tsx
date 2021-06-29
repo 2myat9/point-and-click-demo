@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import Card from "./Card";
+import Card from "./Components/Card";
+import { Link } from "react-router-dom";
 
 interface PageType {
   imgUrl: string;
@@ -59,12 +60,14 @@ const Help = () => {
   return (
     <>
       <div className="p-4 pb-0">
-        <button
-          className="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded"
-          type="button"
-        >
-          Back
-        </button>
+        <Link to="/">
+          <button
+            className="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded"
+            type="button"
+          >
+            Back
+          </button>
+        </Link>
       </div>
       <Card
         activePage={activePage}

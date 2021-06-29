@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-// import ReactDOM from "react-dom";
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+
 import "./index.css";
 import ladyBugImg from "./images/ladybug.png";
 import beeImg from "./images/bee.png";
@@ -7,6 +8,7 @@ import miteImg from "./images/mite.png";
 import slugImg from "./images/slug.png";
 import backgroundImg from "./images/background.jpg";
 // import { readBuilderProgram } from "typescript";
+import Help from "./help";
 
 // number of bad bugs to be clicked to win the game
 const TARGET_CORRECT_GUESSES: number = 2;
@@ -382,6 +384,14 @@ const Game: React.FC<GameProps> = (props) => {
   // render
   return (
     <>
+      <Link to="/help" className="z-20 absolute top-4 right-8">
+        <button
+          className="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded"
+          type="button"
+        >
+          Help Me
+        </button>
+      </Link>
       <Modal
         showModal={showModal}
         isFriendly={currentBugType ? BUGS[currentBugType].isFriendly : false}
@@ -415,5 +425,15 @@ const Game: React.FC<GameProps> = (props) => {
   );
 };
 
-// ReactDOM.render(<Game />, document.getElementById("root"));
-export default Game;
+const App = () => {
+  return (
+    <Router>
+      <Switch>
+        <Route exact path="/" component={Game} />
+        <Route path="/help" component={Help} />
+      </Switch>
+    </Router>
+  );
+};
+
+export default App;
