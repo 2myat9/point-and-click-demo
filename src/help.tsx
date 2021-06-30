@@ -12,24 +12,24 @@ interface PageType {
 const PAGES: { [key: string]: PageType } = {
   PAGE1: {
     imgUrl:
-      "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1325&q=80",
-    cardTitle: "Tip # 1",
+      "https://images.unsplash.com/photo-1576347819574-903b60efcd69?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1491&q=80",
+    cardTitle: "Bees",
     cardBody:
-      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quibusdam eveniet amet fuga ipsam inventore, ab minima nemo! Pariatur molestias eos quisquam voluptatum sit. Earum voluptatibus consectetur minima aspernatur quod consequatur!",
+      "Bees are important because they are polliinators, and pollination is what makes food production possible. A third of the world's food production depends on bees, i.e. every third spoonful of food depends on pollination. Source: worldbeeday.org",
   },
   PAGE2: {
     imgUrl:
-      "https://images.unsplash.com/photo-1511497584788-876760111969?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1489&q=80",
-    cardTitle: "Tip # 2",
+      "https://images.unsplash.com/photo-1572602547000-46f762c5723c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    cardTitle: "Slugs",
     cardBody:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius quae voluptatem ea sint temporibus eligendi, expedita sed ipsam consequuntur aliquid.",
+      "Slugs are harmful because they eat any kind of vegetation and can damage plants and crops. They tend to live in high moisture environments. Source: gardeningknowhow.com",
   },
   PAGE3: {
     imgUrl:
-      "https://images.unsplash.com/photo-1453791052107-5c843da62d97?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    cardTitle: "Tip # 3",
+      "https://images.unsplash.com/photo-1508232926939-f05374492c7b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    cardTitle: "Ladybugs",
     cardBody:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Consectetur dolore architecto dolorem odio rem, earum deleniti. Fugit unde laudantium iusto rerum, fuga sapiente necessitatibus culpa?",
+      "Ladybugs are good because they feed on soft-bodied, plant-eating insects such as mites, aphids, scales, thripes, and white flies. More than 450 ladybugs species can be found in North America, the most common of which is the seven-spotted ladybug. Source: hgtv.com",
   },
 };
 
@@ -65,7 +65,7 @@ const Help = () => {
             className="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded"
             type="button"
           >
-            Back
+            Play Game
           </button>
         </Link>
       </div>

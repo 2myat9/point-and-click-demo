@@ -7,7 +7,6 @@ import beeImg from "./images/bee.png";
 import miteImg from "./images/mite.png";
 import slugImg from "./images/slug.png";
 import backgroundImg from "./images/background.jpg";
-// import { readBuilderProgram } from "typescript";
 import Help from "./help";
 
 // number of bad bugs to be clicked to win the game
@@ -389,7 +388,7 @@ const Game: React.FC<GameProps> = (props) => {
           className="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded"
           type="button"
         >
-          Help Me
+          Teach Me
         </button>
       </Link>
       <Modal
